@@ -14,7 +14,7 @@ int heshDel = 13;
  */
 
 struct Titem {
-    unsigned int Key = 0;
+    int Key = 0;
     string Prod[2];
     bool open = true;
 };
@@ -30,24 +30,22 @@ int heshFunction(int articNum) {
     return articNum % heshDel;
 }
 
-void outFile(TTable table) {
+void outFile(const TTable& table) {
     ofstream out;
     out.open("output.txt");
-    for (int i = 0; i < table.values.size(); ++i) {
-        table.values[i] = table.values[i];
-        if (!table.values[i].open && table.values[i].Key > 0)
-            out << table.values[i].Key << " " << table.values[i].Prod[0] <<
-                " " << table.values[i].Prod[1] << endl;
+    for (auto & value : table.values) {
+        if (!value.open && value.Key > 0)
+            out << value.Key << " " << value.Prod[0] <<
+                " " << value.Prod[1] << endl;
     }
 }
 
 //  Нормальная вставка
-void putProdFinal(Titem item, TTable *table) {
+void putProd(const Titem& item, TTable *table) {
     int ind = heshFunction(item.Key);
 //  Находим место
-    while (!(table->values[ind].open && table->N != -1)) {
+    while (!(table->values[ind].open && table->values[ind].Key != -1)) {
         ind++;
-        if (ind >= table->values.size()) break;
     }
 //    Проверка на рехэш
     if ((table->N >= table->values.size() * 0.75) || ind >= table->values.size()) {
@@ -59,14 +57,13 @@ void putProdFinal(Titem item, TTable *table) {
         newTable.values.resize(heshDel + 5);
         for (int i = 0; i < table->values.size(); ++i) {
             if (!table->values[i].open && table->values[i].Key != -1) {
-                putProdFinal(table->values[i], &newTable);
+                putProd(table->values[i], &newTable);
             }
         }
         for (int i = 0; i < heshDel + 5; ++i) {
             table->values[i] = newTable.values[i];
         }
-        //table = &newTable;
-        putProdFinal(item, table);
+        putProd(item, table);
         return;
     }
 //    Кладем в ячейку
@@ -77,51 +74,18 @@ void putProdFinal(Titem item, TTable *table) {
     outFile(*table);
 }
 
-/*  вставка 1 вариант, неправильно
-void putProd(Titem item, TTable *table, int ind) {
-    if (table->values[ind].open && table->N != -1) {
-        table->values[ind] = item;
-        table->values[ind].open = false;
-        table->N++;
-        cout << "in " << ind << " index\n";
-        return;
-    } else {
-        //добавление на 1 ячейку
-        ind++;
-        if (table->N >= table->values.size() * 0.75) {
-            table->values.resize(table->values.size() * 2);
-            heshDel *= 2;
-            TTable newTable;
-            for (int i = 0; i < table->values.size(); ++i) {
-                if (!table->values[i].open && table->values[i].Key != -1) {
-                    cout << table->values[i].Key << " ";
-                    putProd(table->values[i], &newTable,heshFunction(table->values[i].Key));
-                }
-            }
-            cout << endl << "Рехеширую!" << endl;
-        }
-        if (ind == table->values.size()) {
-            table->values.resize(table->values.size() + 1);
-            cout << "!Увеличение на 1!\n";
-        }
-        putProd(item, table, ind);
-    }
-} */
-
 void rehesh(TTable *table) {
     cout << "Рехеш после удаления ячейки" << endl;
     TTable newTable;
     newTable.values.resize(heshDel + 5);
-    for (int i = 0; i < table->values.size(); ++i) {
-        if (!table->values[i].open && table->values[i].Key != -1) {
-            putProdFinal(table->values[i], &newTable);
+    for (auto & value : table->values) {
+        if (!value.open && value.Key != -1) {
+            putProd(value, &newTable);
         }
     }
     for (int i = 0; i < heshDel + 5; ++i) {
         table->values[i] = newTable.values[i];
-
     }
-    return;
 }
 
 // Взятие из хэша функции на вход поступает артикул
@@ -137,17 +101,6 @@ void findProd(int artic, TTable table, int ind) {
         }
         findProd(artic, table, ind);
     }
-    /*int ind = heshFunction(artic);
-//  Находим место
-    while (table->values[ind].Key != artic) {
-        ind++;
-        if (ind >= table->values.size()){
-            cout << "Такого нет\n";
-            return;
-        }
-    }
-    cout << "Нашел!\n";
-    cout << table->values[ind].Prod[0] << " " << table->values[ind].Prod[1] << endl << endl;*/
 }
 
 // Удаление продукта
@@ -184,12 +137,13 @@ void takeCin(TTable *table) {
     item.Key = a;
     item.Prod[0] = b;
     item.Prod[1] = c;
-    putProdFinal(item, table);
+    item.open = false;
+    putProd(item, table);
     outFile(*table);
 }
 
 // Взятие товаров из файла
-void takeInformation(string file, TTable *table) {
+void takeInformation(const string & file, TTable *table) {
     Titem item;
     ifstream in;
     in.open(file);
@@ -200,7 +154,7 @@ void takeInformation(string file, TTable *table) {
         item.Key = stoi(artic);
         item.Prod[0] = s1;
         item.Prod[1] = s2;
-        putProdFinal(item, table);
+        putProd(item, table);
     }
 }
 
@@ -237,6 +191,7 @@ int main() {
     takeCin(&heshTable);
 
     cout << heshTable.values.size();
+
     cout << endl << heshTable.N;
 }
 
