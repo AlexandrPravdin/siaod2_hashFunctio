@@ -154,8 +154,7 @@ void findProd(int artic, TTable table, int ind) {
 void deleteProd(int artic, TTable *table, int ind) {
     if (table->values[ind].Key == artic) {
         cout << "Удалил из " << ind << " ячейки " << endl;
-        table->values[ind].Key = -1; //оставлятет ячейку закрытой для записи, но трет ключ, чтобы программа понимала,
-        //что в ячейке ничего нет
+        table->values[ind].Key = -1; //признак удаленного адреса
         table->Del += 1;
     } else {
         ind++;
@@ -165,11 +164,28 @@ void deleteProd(int artic, TTable *table, int ind) {
         }
         deleteProd(artic, table, ind);
     }
-    if ((table->Del) > (table->N * 0.25)){
+    if ((table->Del) > (table->N * 0.25)) {
         rehesh(table);
         table->N -= table->Del;
         table->Del = 0;
     }
+}
+
+void takeCin(TTable *table) {
+    int a;
+    string b, c;
+    cout << "Введите артикул ";
+    cin >> a;
+    cout << "Введите название ";
+    cin >> b;
+    cout << "Введите количество ";
+    cin >> c;
+    Titem item;
+    item.Key = a;
+    item.Prod[0] = b;
+    item.Prod[1] = c;
+    putProdFinal(item, table);
+    outFile(*table);
 }
 
 // Взятие товаров из файла
@@ -201,22 +217,25 @@ int main() {
     clock_t start = clock();
     findProd(66778, heshTable, heshFunction(66778));
     clock_t end = clock(); //замеры времени и памяти
-    cout << "Working time - " << (double)(end - start) / CLOCKS_PER_SEC << " seconds\n\n";
+    cout << "Working time - " << (double) (end - start) / CLOCKS_PER_SEC << " seconds\n\n";
 
     clock_t start2 = clock();
     findProd(43244, heshTable, heshFunction(43244));
     clock_t end2 = clock(); //замеры времени и памяти
-    cout << "Working time - " << (double)(end2 - start2) / CLOCKS_PER_SEC << " seconds\n\n";
+    cout << "Working time - " << (double) (end2 - start2) / CLOCKS_PER_SEC << " seconds\n\n";
 
     clock_t start3 = clock();
     findProd(56445, heshTable, heshFunction(56445));
     clock_t end3 = clock(); //замеры времени и памяти
-    cout << "Working time - " << (double)(end3 - start3) / CLOCKS_PER_SEC << " seconds\n\n";
+    cout << "Working time - " << (double) (end3 - start3) / CLOCKS_PER_SEC << " seconds\n\n";
 
 
     cout << "-------------------------------------------------" << endl;
     deleteProd(27782, &heshTable, heshFunction(27782));
     cout << "-------------------------------------------------" << endl;
+
+    takeCin(&heshTable);
+
     cout << heshTable.values.size();
     cout << endl << heshTable.N;
 }
