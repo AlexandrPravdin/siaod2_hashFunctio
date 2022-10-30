@@ -195,16 +195,4 @@ int main() {
     cout << endl << heshTable.N;
 }
 
-/* запихивать в файл
-12331 Meal 322
-42445 Honey 21
-42366 Popcorn 215
-65436 Cola 11
-26609 Water 122
-24662 Tea 120
-23620 Salat 122
-23611 FAFF 22
-23654 sljf 2028
-23668 Sadsf 2024
-23670 Ssf 25
- */
+//хроно
